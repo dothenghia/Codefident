@@ -1,0 +1,115 @@
+{
+  "name": "line-marker",
+  "displayName": "Line Marker",
+  "description": "Mark and track reviewed lines and files in VS Code",
+  "version": "1.0.0",
+  "publisher": "vscode-extensions",
+  "author": {
+    "name": "Line Marker Team"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vscode-extensions/line-marker"
+  },
+  "engines": {
+    "vscode": "^1.87.0"
+  },
+  "categories": [
+    "Other",
+    "Programming Languages",
+    "Visualization"
+  ],
+  "keywords": [
+    "code review",
+    "review",
+    "mark",
+    "highlight",
+    "tracking"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "line-marker.markSelectedLines",
+        "title": "Line Marker: Mark Selected Lines"
+      },
+      {
+        "command": "line-marker.unmarkSelectedLines",
+        "title": "Line Marker: Unmark Selected Lines"
+      },
+      {
+        "command": "line-marker.markFile",
+        "title": "Line Marker: Mark File as Reviewed"
+      },
+      {
+        "command": "line-marker.unmarkFile",
+        "title": "Line Marker: Unmark File"
+      },
+      {
+        "command": "line-marker.clearAllMarkedFiles",
+        "title": "Line Marker: Clear All Marked Files"
+      },
+      {
+        "command": "line-marker.clearAllLineMarksInFile",
+        "title": "Line Marker: Clear All Line Marks in This File"
+      }
+    ],
+    "menus": {
+      "editor/context": [
+        {
+          "command": "line-marker.markSelectedLines",
+          "group": "line-marker@1",
+          "when": "editorTextFocus"
+        },
+        {
+          "command": "line-marker.unmarkSelectedLines",
+          "group": "line-marker@2",
+          "when": "editorTextFocus"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "line-marker.markFile",
+          "group": "line-marker@1"
+        },
+        {
+          "command": "line-marker.unmarkFile",
+          "group": "line-marker@2"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Line Marker",
+      "properties": {
+        "line-marker.highlightColor": {
+          "type": "string",
+          "default": "rgba(0, 122, 204, 0.2)",
+          "description": "Color used to highlight reviewed lines"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "pretest": "npm run compile && npm run lint",
+    "lint": "eslint src",
+    "test": "vscode-test"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.87.0",
+    "@types/mocha": "^10.0.10",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
+    "eslint": "^9.23.0",
+    "typescript": "^5.8.2",
+    "@vscode/test-cli": "^0.0.10",
+    "@vscode/test-electron": "^2.4.1"
+  }
+}
