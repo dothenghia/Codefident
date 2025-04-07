@@ -44,6 +44,31 @@ All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shif
 3. Type `ext install line-marker`
 4. Click Install
 
+## Packaging the Extension
+
+To create a `.vsix` package for distribution:
+
+1. Make sure you have the VSCE (Visual Studio Code Extensions) tool installed:
+
+   ```bash
+   npm install -g @vscode/vsce
+   ```
+
+2. Build and package the extension:
+
+   ```bash
+   npm run compile && vsce package
+   ```
+
+   This will create a `.vsix` file in your project directory that can be installed in VS Code.
+
+3. To install the packaged extension:
+   - Open VS Code
+   - Go to Extensions view (Ctrl+Shift+X / Cmd+Shift+X)
+   - Click on the "..." menu at the top
+   - Select "Install from VSIX..."
+   - Choose your `.vsix` file
+
 ## Configuration
 
 You can customize the appearance of reviewed lines and files in your VS Code settings:
