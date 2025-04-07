@@ -125,6 +125,9 @@ export class FileMarker {
       return;
     }
 
+    // Store the marked files before clearing
+    const markedFilesArray = Array.from(this.markedFiles);
+
     // Clear all file marks
     this.markedFiles.clear();
 
@@ -134,8 +137,14 @@ export class FileMarker {
     // Notify about changes to all workspace folders
     const workspaceFolders = vscode.workspace.workspaceFolders;
     if (workspaceFolders) {
+      // Notify about changes to all workspace folders
       const uris = workspaceFolders.map((folder) => folder.uri);
       this._onDidChangeFileDecorations.fire(uris);
+
+      // Also notify about changes to each marked file individually
+      markedFilesArray.forEach((filePath) => {
+        this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
+      });
     }
 
     vscode.window.showInformationMessage(

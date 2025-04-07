@@ -32,6 +32,11 @@ All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shif
 - `Reset All File Marks in Project` - Remove all marked files in the current workspace
 - `Reset All Line Marks in Project` - Remove all line markings across all files in the workspace
 
+### Keyboard Shortcuts
+
+- `Alt+Shift+W` - Toggle Line Mark (mark/unmark selected lines)
+- `Alt+Shift+E` - Toggle File Mark (mark/unmark current file)
+
 ### State Persistence
 
 - All marked lines and files are automatically saved and restored when you reopen VS Code
@@ -95,6 +100,7 @@ You can customize the appearance of reviewed lines and files in your VS Code set
 2. Right-click and select "Toggle Line Mark" or use the Command Palette
 3. The lines will be highlighted with the configured color
 4. Select already marked lines and use the same command to unmark them
+5. Alternatively, use the keyboard shortcut `Alt+Shift+W` to toggle line marks
 
 ### Marking Files
 
@@ -102,6 +108,7 @@ You can customize the appearance of reviewed lines and files in your VS Code set
 2. Select "Toggle File Mark"
 3. A checkmark icon will appear next to the file
 4. Use the same command to unmark the file
+5. Alternatively, use the keyboard shortcut `Alt+Shift+E` to toggle file marks
 
 ### Clearing Marks
 
