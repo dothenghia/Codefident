@@ -34,51 +34,56 @@
   "contributes": {
     "commands": [
       {
-        "command": "line-marker.markSelectedLines",
-        "title": "Line Marker: Mark Selected Lines"
+        "command": "line-marker.toggleSelectedLines",
+        "title": "Toggle Line Mark",
+        "description": "Mark/Unmark the selected lines as reviewed"
       },
       {
-        "command": "line-marker.unmarkSelectedLines",
-        "title": "Line Marker: Unmark Selected Lines"
-      },
-      {
-        "command": "line-marker.markFile",
-        "title": "Line Marker: Mark File as Reviewed"
-      },
-      {
-        "command": "line-marker.unmarkFile",
-        "title": "Line Marker: Unmark File"
-      },
-      {
-        "command": "line-marker.clearAllMarkedFiles",
-        "title": "Line Marker: Clear All Marked Files"
+        "command": "line-marker.toggleFile",
+        "title": "Toggle File Mark",
+        "description": "Mark/Unmark the current file as reviewed"
       },
       {
         "command": "line-marker.clearAllLineMarksInFile",
-        "title": "Line Marker: Clear All Line Marks in This File"
+        "title": "Remove All Line Marks",
+        "description": "Remove all marked lines in the current file"
+      },
+      {
+        "command": "line-marker.clearAllFileMarksInDirectory",
+        "title": "Reset All File Marks in Project",
+        "description": "Remove all marked files in the current workspace"
+      },
+      {
+        "command": "line-marker.clearAllLineMarksInDirectory",
+        "title": "Reset All Line Marks in Project",
+        "description": "Remove all line markings across all files in the workspace"
       }
     ],
     "menus": {
       "editor/context": [
         {
-          "command": "line-marker.markSelectedLines",
+          "command": "line-marker.toggleSelectedLines",
           "group": "line-marker@1",
           "when": "editorTextFocus"
         },
         {
-          "command": "line-marker.unmarkSelectedLines",
+          "command": "line-marker.clearAllLineMarksInFile",
           "group": "line-marker@2",
           "when": "editorTextFocus"
         }
       ],
       "explorer/context": [
         {
-          "command": "line-marker.markFile",
+          "command": "line-marker.toggleFile",
           "group": "line-marker@1"
         },
         {
-          "command": "line-marker.unmarkFile",
+          "command": "line-marker.clearAllFileMarksInDirectory",
           "group": "line-marker@2"
+        },
+        {
+          "command": "line-marker.clearAllLineMarksInDirectory",
+          "group": "line-marker@3"
         }
       ]
     },

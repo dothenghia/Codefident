@@ -6,27 +6,31 @@ A lightweight Visual Studio Code extension for marking and tracking reviewed lin
 
 ### Mark Lines as Reviewed
 
-- Select lines in the editor and mark them as "Reviewed"
+- Select lines in the editor and toggle them as "Reviewed"
 - Marked lines are highlighted with a customizable background color
-- Unmark lines when needed
 - Access via right-click context menu or Command Palette
 
 ### Mark Files as Reviewed
 
-- Mark entire files as "Reviewed"
+- Toggle the file as "Reviewed"
 - Files marked as reviewed show a checkmark (✓) in the Explorer view
 - Access via right-click in Explorer or Command Palette
+
+### Other Operations
+
+- Remove all line marks in the current file
+- Reset all line marks across the entire project
+- Reset all file marks across the entire project
 
 ### Available Commands
 
 All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shift+P):
 
-- `Line Marker: Mark Selected Lines` - Mark selected lines as reviewed
-- `Line Marker: Unmark Selected Lines` - Remove review marks from selected lines
-- `Line Marker: Mark File as Reviewed` - Mark the current file as reviewed
-- `Line Marker: Unmark File` - Remove the reviewed mark from the current file
-- `Line Marker: Clear All Marked Files` - Clear all file-level review marks
-- `Line Marker: Clear All Line Marks in This File` - Clear all line-level marks in the current file
+- `Toggle Line Mark` - Mark/Unmark the selected lines as reviewed
+- `Toggle File Mark` - Mark/Unmark the current file as reviewed
+- `Remove All Line Marks` - Remove all marked lines in the current file
+- `Reset All File Marks in Project` - Remove all marked files in the current workspace
+- `Reset All Line Marks in Project` - Remove all line markings across all files in the workspace
 
 ### State Persistence
 
@@ -55,19 +59,22 @@ You can customize the highlight color for reviewed lines in your VS Code setting
 ### Marking Lines
 
 1. Select one or more lines in your code
-2. Right-click and select "Mark Selected Lines" or use the Command Palette
+2. Right-click and select "Toggle Line Mark" or use the Command Palette
 3. The lines will be highlighted with the configured color
+4. Select already marked lines and use the same command to unmark them
 
 ### Marking Files
 
 1. Right-click on a file in the Explorer
-2. Select "Mark File as Reviewed"
+2. Select "Toggle File Mark"
 3. A checkmark will appear next to the file
+4. Use the same command to unmark the file
 
 ### Clearing Marks
 
-- Use the Command Palette to clear all marks or specific marks
-- Right-click on marked lines or files to unmark them
+- Use "Remove All Line Marks" to clear all line marks in the current file
+- Use "Reset All Line Marks in Project" to clear all line marks across the entire project
+- Use "Reset All File Marks in Project" to clear all file marks across the entire project
 
 ## Requirements
 
