@@ -38,8 +38,8 @@ function activate(context) {
     const toggleSelectedLinesCommand = vscode.commands.registerCommand(constants_1.COMMANDS.TOGGLE_SELECTED_LINES, () => __awaiter(this, void 0, void 0, function* () {
         yield lineMarker.toggleSelectedLines();
     }));
-    const toggleFileCommand = vscode.commands.registerCommand(constants_1.COMMANDS.TOGGLE_FILE, () => __awaiter(this, void 0, void 0, function* () {
-        yield fileMarker.toggleFile();
+    const toggleFileCommand = vscode.commands.registerCommand(constants_1.COMMANDS.TOGGLE_FILE, (fileUri) => __awaiter(this, void 0, void 0, function* () {
+        yield fileMarker.toggleFile(fileUri);
     }));
     const clearAllLineMarksInFileCommand = vscode.commands.registerCommand(constants_1.COMMANDS.CLEAR_ALL_LINE_MARKS_IN_FILE, () => __awaiter(this, void 0, void 0, function* () {
         yield lineMarker.clearAllLineMarksInFile();

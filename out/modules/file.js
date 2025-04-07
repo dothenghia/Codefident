@@ -54,21 +54,46 @@ class FileMarker {
         };
     }
     // Toggle mark for current file
-    toggleFile() {
+    toggleFile(fileUri) {
         return __awaiter(this, void 0, void 0, function* () {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor) {
-                return;
+            let targetUri;
+            if (fileUri) {
+                // If a file URI is provided (from Explorer context menu), use it
+                targetUri = fileUri;
             }
-            const filePath = editor.document.uri.fsPath;
+            else {
+                // Otherwise, use the active editor's document URI
+                const editor = vscode.window.activeTextEditor;
+                if (!editor) {
+                    return;
+                }
+                targetUri = editor.document.uri;
+            }
+            const filePath = targetUri.fsPath;
             if (this.markedFiles.has(filePath)) {
                 // If file is already marked, unmark it
-                this.unmarkFile();
+                this.unmarkFileByPath(filePath);
             }
             else {
                 // If file is not marked, mark it
-                this.markFile();
+                this.markFileByPath(filePath);
             }
+        });
+    }
+    // Mark file by path
+    markFileByPath(filePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.markedFiles.add(filePath);
+            yield this.saveState();
+            this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
+        });
+    }
+    // Unmark file by path
+    unmarkFileByPath(filePath) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.markedFiles.delete(filePath);
+            yield this.saveState();
+            this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
         });
     }
     // Mark current file
@@ -79,9 +104,7 @@ class FileMarker {
                 return;
             }
             const filePath = editor.document.uri.fsPath;
-            this.markedFiles.add(filePath);
-            yield this.saveState();
-            this._onDidChangeFileDecorations.fire(editor.document.uri);
+            yield this.markFileByPath(filePath);
         });
     }
     // Unmark current file
@@ -92,9 +115,7 @@ class FileMarker {
                 return;
             }
             const filePath = editor.document.uri.fsPath;
-            this.markedFiles.delete(filePath);
-            yield this.saveState();
-            this._onDidChangeFileDecorations.fire(editor.document.uri);
+            yield this.unmarkFileByPath(filePath);
         });
     }
     // Reset all file marks in the project (workspace)

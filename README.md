@@ -12,9 +12,11 @@ A lightweight Visual Studio Code extension for marking and tracking reviewed lin
 
 ### Mark Files as Reviewed
 
-- Toggle the file as "Reviewed"
+- Toggle the file as "Reviewed" directly from the Explorer view
+- Right-click on a file in the Explorer to mark/unmark it
+- Use the keyboard shortcut when a file is selected in the Explorer
 - Files marked as reviewed show a checkmark (✓) or a customizable icon in the Explorer view
-- Access via right-click in Explorer or Command Palette
+- Access via right-click in Explorer, keyboard shortcut, or Command Palette
 
 ### Other Operations
 
@@ -35,7 +37,7 @@ All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shif
 ### Keyboard Shortcuts
 
 - `Alt+Shift+W` - Toggle Line Mark (mark/unmark selected lines)
-- `Alt+Shift+E` - Toggle File Mark (mark/unmark current file)
+- `Alt+Shift+E` - Toggle File Mark (mark/unmark file when selected in Explorer or focused in editor)
 
 ### State Persistence
 
@@ -104,11 +106,11 @@ You can customize the appearance of reviewed lines and files in your VS Code set
 
 ### Marking Files
 
-1. Right-click on a file in the Explorer
-2. Select "Toggle File Mark"
-3. A checkmark icon will appear next to the file
-4. Use the same command to unmark the file
-5. Alternatively, use the keyboard shortcut `Alt+Shift+E` to toggle file marks
+1. In the Explorer view, right-click on a file and select "Toggle File Mark"
+2. Alternatively, select a file in the Explorer and press `Alt+Shift+E`
+3. You can also mark the currently open file by pressing `Alt+Shift+E` while the editor is focused
+4. A checkmark icon will appear next to the file
+5. Use the same command to unmark the file
 
 ### Clearing Marks
 

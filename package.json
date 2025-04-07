@@ -70,7 +70,7 @@
         "command": "line-marker.toggleFile",
         "key": "alt+shift+e",
         "mac": "alt+shift+e",
-        "when": "editorTextFocus"
+        "when": "resourceLangId && explorerViewletVisible || editorTextFocus"
       }
     ],
     "menus": {

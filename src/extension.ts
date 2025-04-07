@@ -38,8 +38,8 @@ export function activate(context: vscode.ExtensionContext) {
 
   const toggleFileCommand = vscode.commands.registerCommand(
     COMMANDS.TOGGLE_FILE,
-    async () => {
-      await fileMarker.toggleFile();
+    async (fileUri?: vscode.Uri) => {
+      await fileMarker.toggleFile(fileUri);
     }
   );
 
