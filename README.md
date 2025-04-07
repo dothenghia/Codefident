@@ -13,7 +13,7 @@ A lightweight Visual Studio Code extension for marking and tracking reviewed lin
 ### Mark Files as Reviewed
 
 - Toggle the file as "Reviewed"
-- Files marked as reviewed show a checkmark (✓) in the Explorer view
+- Files marked as reviewed show a checkmark (✓) or a customizable icon in the Explorer view
 - Access via right-click in Explorer or Command Palette
 
 ### Other Operations
@@ -46,13 +46,21 @@ All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shif
 
 ## Configuration
 
-You can customize the highlight color for reviewed lines in your VS Code settings:
+You can customize the appearance of reviewed lines and files in your VS Code settings:
 
 ```json
 {
-  "line-marker.highlightColor": "rgba(0, 122, 204, 0.2)"
+  "line-marker.highlightColor": "rgba(0, 122, 204, 0.2)",
+  "line-marker.reviewedFileIcon": "✓"
 }
 ```
+
+### Available Settings
+
+- `line-marker.highlightColor`: Color used to highlight reviewed lines (default: "rgba(0, 122, 204, 0.2)")
+- `line-marker.reviewedFileIcon`: Icon character displayed for reviewed files in the Explorer (default: "✓")
+  - Must be a single character, including emoji like "🥰" or "✅"
+  - Only the first character will be used if multiple characters are provided
 
 ## Usage
 
@@ -67,7 +75,7 @@ You can customize the highlight color for reviewed lines in your VS Code setting
 
 1. Right-click on a file in the Explorer
 2. Select "Toggle File Mark"
-3. A checkmark will appear next to the file
+3. A checkmark icon will appear next to the file
 4. Use the same command to unmark the file
 
 ### Clearing Marks

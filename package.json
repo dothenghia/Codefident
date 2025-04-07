@@ -59,6 +59,26 @@
         "description": "Remove all line markings across all files in the workspace"
       }
     ],
+    "keybindings": [
+      {
+        "command": "line-marker.toggleSelectedLines",
+        "key": "alt+w",
+        "mac": "alt+w",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "line-marker.toggleFile",
+        "key": "alt+e",
+        "mac": "alt+e",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "line-marker.clearAllLineMarksInFile",
+        "key": "alt+shift+w",
+        "mac": "alt+shift+w",
+        "when": "editorTextFocus"
+      }
+    ],
     "menus": {
       "editor/context": [
         {
@@ -94,6 +114,11 @@
           "type": "string",
           "default": "rgba(0, 122, 204, 0.2)",
           "description": "Color used to highlight reviewed lines"
+        },
+        "line-marker.reviewedFileIcon": {
+          "type": "string",
+          "default": "✓",
+          "description": "Icon character displayed for reviewed files in the Explorer (must be a single character, allow emoji)"
         }
       }
     }

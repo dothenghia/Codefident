@@ -16,6 +16,7 @@ export const STORAGE_KEYS = {
 // Configuration keys
 export const CONFIG_KEYS = {
   HIGHLIGHT_COLOR: "line-marker.highlightColor",
+  FILE_ICON: "line-marker.reviewedFileIcon",
 };
 
 // Default values

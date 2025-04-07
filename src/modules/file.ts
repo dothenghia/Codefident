@@ -1,5 +1,10 @@
 import * as vscode from "vscode";
-import { STORAGE_KEYS, DEFAULTS, MESSAGES } from "../constants/constants";
+import {
+  STORAGE_KEYS,
+  DEFAULTS,
+  MESSAGES,
+  CONFIG_KEYS,
+} from "../constants/constants";
 
 export class FileMarker {
   private markedFiles: Set<string>;
@@ -22,6 +27,15 @@ export class FileMarker {
       vscode.window.registerFileDecorationProvider(this.fileDecorationProvider),
       this._onDidChangeFileDecorations
     );
+
+    // Listen for configuration changes
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration(CONFIG_KEYS.FILE_ICON)) {
+          this._onDidChangeFileDecorations.fire(vscode.Uri.file(""));
+        }
+      })
+    );
   }
 
   public getMarkedFiles(): Set<string> {
@@ -37,8 +51,18 @@ export class FileMarker {
       onDidChangeFileDecorations: this._onDidChangeFileDecorations.event,
       provideFileDecoration: (uri: vscode.Uri) => {
         if (this.markedFiles.has(uri.fsPath)) {
+          const config = vscode.workspace.getConfiguration("line-marker");
+          const reviewedFileIcon =
+            config.get<string>(CONFIG_KEYS.FILE_ICON) || DEFAULTS.FILE_BADGE;
+
+          // Ensure the icon is only a single character
+          const icon =
+            reviewedFileIcon.length > 0
+              ? reviewedFileIcon.charAt(0)
+              : DEFAULTS.FILE_BADGE;
+
           return {
-            badge: DEFAULTS.FILE_BADGE,
+            badge: icon,
             tooltip: DEFAULTS.FILE_TOOLTIP,
           };
         }
