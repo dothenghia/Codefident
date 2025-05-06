@@ -1,22 +1,22 @@
 // Command IDs
 export const COMMANDS = {
-  TOGGLE_SELECTED_LINES: "line-marker.toggleSelectedLines",
-  TOGGLE_FILE: "line-marker.toggleFile",
-  CLEAR_ALL_LINE_MARKS_IN_FILE: "line-marker.clearAllLineMarksInFile",
-  CLEAR_ALL_LINE_MARKS_IN_DIRECTORY: "line-marker.clearAllLineMarksInDirectory",
-  CLEAR_ALL_FILE_MARKS_IN_DIRECTORY: "line-marker.clearAllFileMarksInDirectory",
+  TOGGLE_SELECTED_LINES: "codefident.toggleSelectedLines",
+  TOGGLE_FILE: "codefident.toggleFile",
+  CLEAR_ALL_LINE_MARKS_IN_FILE: "codefident.clearAllLineMarksInFile",
+  CLEAR_ALL_LINE_MARKS_IN_DIRECTORY: "codefident.clearAllLineMarksInDirectory",
+  CLEAR_ALL_FILE_MARKS_IN_DIRECTORY: "codefident.clearAllFileMarksInDirectory",
 };
 
 // Storage keys
 export const STORAGE_KEYS = {
-  MARKED_LINES: "line-marker:marked-lines",
-  MARKED_FILES: "line-marker:marked-files",
+  MARKED_LINES: "codefident:marked-lines",
+  MARKED_FILES: "codefident:marked-files",
 };
 
 // Configuration keys
 export const CONFIG_KEYS = {
-  HIGHLIGHT_COLOR: "line-marker.highlightColor",
-  FILE_ICON: "line-marker.reviewedFileIcon",
+  HIGHLIGHT_COLOR: "codefident.highlightColor",
+  FILE_ICON: "codefident.reviewedFileIcon",
 };
 
 // Default values

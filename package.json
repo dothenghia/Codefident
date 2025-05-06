@@ -1,16 +1,16 @@
 {
-  "name": "line-marker",
-  "displayName": "Line Marker",
+  "name": "codefident",
+  "displayName": "Codefident",
   "description": "Mark and track reviewed lines and files in VS Code",
   "version": "1.0.0",
   "publisher": "vscode-extensions",
   "author": {
-    "name": "Line Marker Team"
+    "name": "Codefident Team"
   },
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/dothenghia/Line-Marker"
+    "url": "https://github.com/dothenghia/Codefident"
   },
   "engines": {
     "vscode": "^1.87.0"
@@ -34,40 +34,40 @@
   "contributes": {
     "commands": [
       {
-        "command": "line-marker.toggleSelectedLines",
+        "command": "codefident.toggleSelectedLines",
         "title": "Toggle Line Mark",
         "description": "Mark/Unmark the selected lines as reviewed"
       },
       {
-        "command": "line-marker.toggleFile",
+        "command": "codefident.toggleFile",
         "title": "Toggle File Mark",
         "description": "Mark/Unmark the current file as reviewed"
       },
       {
-        "command": "line-marker.clearAllLineMarksInFile",
+        "command": "codefident.clearAllLineMarksInFile",
         "title": "Remove All Line Marks",
         "description": "Remove all marked lines in the current file"
       },
       {
-        "command": "line-marker.clearAllFileMarksInDirectory",
+        "command": "codefident.clearAllFileMarksInDirectory",
         "title": "Reset All File Marks in Project",
         "description": "Remove all marked files in the current workspace"
       },
       {
-        "command": "line-marker.clearAllLineMarksInDirectory",
+        "command": "codefident.clearAllLineMarksInDirectory",
         "title": "Reset All Line Marks in Project",
         "description": "Remove all line markings across all files in the workspace"
       }
     ],
     "keybindings": [
       {
-        "command": "line-marker.toggleSelectedLines",
+        "command": "codefident.toggleSelectedLines",
         "key": "alt+shift+w",
         "mac": "alt+shift+w",
         "when": "editorTextFocus"
       },
       {
-        "command": "line-marker.toggleFile",
+        "command": "codefident.toggleFile",
         "key": "alt+shift+e",
         "mac": "alt+shift+e",
         "when": "resourceLangId && explorerViewletVisible || editorTextFocus"
@@ -76,40 +76,40 @@
     "menus": {
       "editor/context": [
         {
-          "command": "line-marker.toggleSelectedLines",
-          "group": "line-marker@1",
+          "command": "codefident.toggleSelectedLines",
+          "group": "codefident@1",
           "when": "editorTextFocus"
         },
         {
-          "command": "line-marker.clearAllLineMarksInFile",
-          "group": "line-marker@2",
+          "command": "codefident.clearAllLineMarksInFile",
+          "group": "codefident@2",
           "when": "editorTextFocus"
         }
       ],
       "explorer/context": [
         {
-          "command": "line-marker.toggleFile",
-          "group": "line-marker@1"
+          "command": "codefident.toggleFile",
+          "group": "codefident@1"
         },
         {
-          "command": "line-marker.clearAllFileMarksInDirectory",
-          "group": "line-marker@2"
+          "command": "codefident.clearAllFileMarksInDirectory",
+          "group": "codefident@2"
         },
         {
-          "command": "line-marker.clearAllLineMarksInDirectory",
-          "group": "line-marker@3"
+          "command": "codefident.clearAllLineMarksInDirectory",
+          "group": "codefident@3"
         }
       ]
     },
     "configuration": {
-      "title": "Line Marker",
+      "title": "Codefident",
       "properties": {
-        "line-marker.highlightColor": {
+        "codefident.highlightColor": {
           "type": "string",
           "default": "rgba(0, 122, 204, 0.2)",
           "description": "Color used to highlight reviewed lines"
         },
-        "line-marker.reviewedFileIcon": {
+        "codefident.reviewedFileIcon": {
           "type": "string",
           "default": "✓",
           "description": "Icon character displayed for reviewed files in the Explorer (must be a single character, allow emoji)"

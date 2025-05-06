@@ -1,4 +1,4 @@
-# Line Marker
+# Codefident
 
 A lightweight Visual Studio Code extension for marking and tracking reviewed lines and files in large codebases.
 
@@ -48,7 +48,7 @@ All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shif
 
 1. Open VS Code
 2. Press `Ctrl+P` / `Cmd+P` to open the Quick Open dialog
-3. Type `ext install line-marker`
+3. Type `ext install codefident`
 4. Click Install
 
 ## Packaging the Extension
@@ -82,15 +82,15 @@ You can customize the appearance of reviewed lines and files in your VS Code set
 
 ```json
 {
-  "line-marker.highlightColor": "rgba(0, 122, 204, 0.2)",
-  "line-marker.reviewedFileIcon": "✓"
+  "codefident.highlightColor": "rgba(0, 122, 204, 0.2)",
+  "codefident.reviewedFileIcon": "✓"
 }
 ```
 
 ### Available Settings
 
-- `line-marker.highlightColor`: Color used to highlight reviewed lines (default: "rgba(0, 122, 204, 0.2)")
-- `line-marker.reviewedFileIcon`: Icon character displayed for reviewed files in the Explorer (default: "✓")
+- `codefident.highlightColor`: Color used to highlight reviewed lines (default: "rgba(0, 122, 204, 0.2)")
+- `codefident.reviewedFileIcon`: Icon character displayed for reviewed files in the Explorer (default: "✓")
   - Must be a single character, including emoji like "🥰" or "✅"
   - Only the first character will be used if multiple characters are provided
 

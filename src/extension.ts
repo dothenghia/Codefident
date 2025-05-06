@@ -4,14 +4,16 @@ import { FileMarker } from "./modules/file";
 import { COMMANDS } from "./constants/constants";
 
 const WELCOME_MESSAGES = [
-  "[Line Marker] Happy Coding! 🥰",
-  "[Line Marker] Have a nice day! 👋",
-  "[Line Marker] Let's write some awesome code! ✨",
-  "[Line Marker] Time to be productive! 💪",
-  "[Line Marker] You're doing great! 🌟",
-  "[Line Marker] Code with confidence! 💻",
-  "[Line Marker] Ready to mark some code? 📝",
-  "[Line Marker] Let's make something amazing! 🚀",
+  "[Codefident] Happy Coding! 🥰",
+  "[Codefident] Have a nice day! 👋",
+  "[Codefident] You're doing great! 🌟",
+  "[Codefident] Code with confidence! 💻",
+  "[Codefident] Let's make something amazing! 🚀",
+  "[Codefident] No need to double-check. You've marked it. ✅",
+  "[Codefident] Trust yourself — you reviewed this already! 🧘",
+  "[Codefident] Don't overthink it. Keep building! 🛠️",
+  "[Codefident] Review once. Move forward. 🔁➡️",
+  "[Codefident] Code it. Review it. Mark it. Done. 🏁",
 ];
 
 export function activate(context: vscode.ExtensionContext) {
@@ -66,7 +68,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Register context menu providers
   const editorContextMenuProvider = vscode.window.registerWebviewViewProvider(
-    "line-marker.editorContextMenu",
+    "codefident.editorContextMenu",
     {
       resolveWebviewView: (webviewView) => {
         webviewView.webview.options = {
@@ -78,7 +80,7 @@ export function activate(context: vscode.ExtensionContext) {
   );
 
   const explorerContextMenuProvider = vscode.window.registerWebviewViewProvider(
-    "line-marker.explorerContextMenu",
+    "codefident.explorerContextMenu",
     {
       resolveWebviewView: (webviewView) => {
         webviewView.webview.options = {
@@ -117,7 +119,7 @@ export function activate(context: vscode.ExtensionContext) {
 export function deactivate() {
   // Show goodbye message
   vscode.window.showInformationMessage(
-    "[Line Marker] Noooo, please use me 🥺💔"
+    "[Codefident] Noooo, please use me 🥺💔"
   );
   // Cleanup is handled by the dispose methods of LineMarker and FileMarker
 }
