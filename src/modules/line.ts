@@ -4,15 +4,20 @@ import {
   CONFIG_KEYS,
   DEFAULTS,
   MESSAGES,
+  LineMarkStyle,
 } from "../constants/constants";
 
+// Interface for line decoration data
 export interface MarkedDecoration {
   range: vscode.Range;
 }
 
 export class LineMarker {
+  // Map of file paths to their decoration types
   private lineDecorationTypes: Map<string, vscode.TextEditorDecorationType>;
+  // Map of file paths to their marked line ranges
   private markedLines: Map<string, MarkedDecoration[]>;
+  // VS Code extension context
   private context: vscode.ExtensionContext;
 
   constructor(context: vscode.ExtensionContext) {
@@ -21,32 +26,52 @@ export class LineMarker {
     this.markedLines = new Map();
   }
 
+  // Get all marked lines across files
   public getMarkedLines(): Map<string, MarkedDecoration[]> {
     return this.markedLines;
   }
 
-  public setMarkedLines(markedLines: Map<string, MarkedDecoration[]>): void {
-    this.markedLines = markedLines;
-  }
-
-  public getDecorationTypeForFile(
+  // Get or create decoration type for a file
+  private getDecorationTypeForFile(
     filePath: string
   ): vscode.TextEditorDecorationType {
     if (!this.lineDecorationTypes.has(filePath)) {
-      const config = vscode.workspace.getConfiguration("line-marker");
-      const highlightColor =
-        config.get<string>(CONFIG_KEYS.HIGHLIGHT_COLOR) ||
-        DEFAULTS.HIGHLIGHT_COLOR;
+      const config = vscode.workspace.getConfiguration();
+      const style =
+        config.get<string>(CONFIG_KEYS.LINE_MARK_STYLE) ||
+        DEFAULTS.LINE_MARK_STYLE;
 
-      const decorationType = vscode.window.createTextEditorDecorationType({
-        backgroundColor: highlightColor,
-        isWholeLine: true,
-      });
+      let decorationRenderOptions: vscode.DecorationRenderOptions;
+
+      if (style === LineMarkStyle.INLINE) {
+        const highlightColor =
+          config.get<string>(CONFIG_KEYS.HIGHLIGHT_COLOR) ||
+          DEFAULTS.HIGHLIGHT_COLOR;
+        decorationRenderOptions = {
+          backgroundColor: highlightColor,
+          isWholeLine: true,
+        };
+      } else {
+        // LineMarkStyle.SIDEBAR
+        const sidebarColor =
+          config.get<string>(CONFIG_KEYS.SIDEBAR_COLOR) ||
+          DEFAULTS.SIDEBAR_COLOR;
+        decorationRenderOptions = {
+          border: `2px solid ${sidebarColor}`,
+          borderStyle: "none none none solid",
+          isWholeLine: true,
+        };
+      }
+
+      const decorationType = vscode.window.createTextEditorDecorationType(
+        decorationRenderOptions
+      );
       this.lineDecorationTypes.set(filePath, decorationType);
     }
     return this.lineDecorationTypes.get(filePath)!;
   }
 
+  // Apply decorations to the current editor
   public applyDecorations(editor: vscode.TextEditor): void {
     const filePath = editor.document.uri.fsPath;
     const decorations = this.markedLines.get(filePath) || [];
@@ -54,7 +79,7 @@ export class LineMarker {
     editor.setDecorations(decorationType, decorations);
   }
 
-  // Toggle mark for selected lines
+  // Toggle review marks for selected lines
   public async toggleSelectedLines(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -62,7 +87,6 @@ export class LineMarker {
     }
 
     const filePath = editor.document.uri.fsPath;
-    const decorationType = this.getDecorationTypeForFile(filePath);
     const existingDecorations = this.markedLines.get(filePath) || [];
 
     // Get the selected lines
@@ -76,33 +100,29 @@ export class LineMarker {
     }));
 
     // Check if all selected lines are already marked
-    const allSelectedLinesMarked = selectedRanges.every((selectedRange) => {
-      return existingDecorations.some((decoration) => {
-        return (
+    const allSelectedLinesMarked = selectedRanges.every((selectedRange) =>
+      existingDecorations.some(
+        (decoration) =>
           decoration.range.start.line <= selectedRange.range.start.line &&
           decoration.range.end.line >= selectedRange.range.end.line
-        );
-      });
-    });
+      )
+    );
 
     if (allSelectedLinesMarked) {
-      // If all selected lines are marked, unmark them
-      this.unmarkSelectedLines();
+      await this.unmarkSelectedLines();
     } else {
-      // If not all selected lines are marked, mark them
-      this.markSelectedLines();
+      await this.markSelectedLines();
     }
   }
 
-  // Mark selected lines
-  public async markSelectedLines(): Promise<void> {
+  // Mark selected lines as reviewed
+  private async markSelectedLines(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
     }
 
     const filePath = editor.document.uri.fsPath;
-    const decorationType = this.getDecorationTypeForFile(filePath);
     const existingDecorations = this.markedLines.get(filePath) || [];
 
     // Get the selected lines
@@ -127,38 +147,87 @@ export class LineMarker {
       }
     });
 
-    // Filter out selected ranges that are already marked
-    const newRanges = selectedRanges.filter((selectedRange) => {
+    // Process each selected line individually to ensure no duplicates
+    const newDecorations: MarkedDecoration[] = [];
+    for (const selection of selectedRanges) {
       for (
-        let i = selectedRange.range.start.line;
-        i <= selectedRange.range.end.line;
-        i++
+        let line = selection.range.start.line;
+        line <= selection.range.end.line;
+        line++
       ) {
-        if (!markedLineNumbers.has(i)) {
-          return true; // At least one line in this range is not marked
+        if (!markedLineNumbers.has(line)) {
+          markedLineNumbers.add(line);
+          newDecorations.push({
+            range: new vscode.Range(
+              line,
+              0,
+              line,
+              editor.document.lineAt(line).text.length
+            ),
+          });
         }
       }
-      return false; // All lines in this range are already marked
-    });
+    }
 
-    if (newRanges.length === 0) {
-      // All selected lines are already marked
+    if (newDecorations.length === 0) {
       return;
     }
 
-    // Combine existing and new decorations
-    const combinedDecorations = [...existingDecorations, ...newRanges];
-    this.markedLines.set(filePath, combinedDecorations);
+    // Combine existing and new decorations, ensuring no overlaps
+    const combinedDecorations = [...existingDecorations, ...newDecorations];
 
-    // Apply decorations to editor
-    editor.setDecorations(decorationType, combinedDecorations);
+    // Sort decorations by line number for better organization
+    combinedDecorations.sort((a, b) => a.range.start.line - b.range.start.line);
 
-    // Save state
+    // Merge adjacent or overlapping ranges
+    const mergedDecorations: MarkedDecoration[] = [];
+    let currentDecoration = combinedDecorations[0];
+
+    for (let i = 1; i < combinedDecorations.length; i++) {
+      const nextDecoration = combinedDecorations[i];
+
+      // If current and next decorations are adjacent or overlapping
+      if (
+        currentDecoration.range.end.line + 1 >=
+        nextDecoration.range.start.line
+      ) {
+        // Merge them by extending the current decoration
+        currentDecoration = {
+          range: new vscode.Range(
+            currentDecoration.range.start.line,
+            0,
+            Math.max(
+              currentDecoration.range.end.line,
+              nextDecoration.range.end.line
+            ),
+            editor.document.lineAt(
+              Math.max(
+                currentDecoration.range.end.line,
+                nextDecoration.range.end.line
+              )
+            ).text.length
+          ),
+        };
+      } else {
+        // If not adjacent, add current to merged list and move to next
+        mergedDecorations.push(currentDecoration);
+        currentDecoration = nextDecoration;
+      }
+    }
+    mergedDecorations.push(currentDecoration);
+
+    // Update the stored decorations
+    this.markedLines.set(filePath, mergedDecorations);
+
+    // Apply decorations
+    const decorationType = this.getDecorationTypeForFile(filePath);
+    editor.setDecorations(decorationType, mergedDecorations);
+
     await this.saveState();
   }
 
-  // Unmark selected lines
-  public async unmarkSelectedLines(): Promise<void> {
+  // Remove review marks from selected lines
+  private async unmarkSelectedLines(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
       return;
@@ -166,36 +235,73 @@ export class LineMarker {
 
     const filePath = editor.document.uri.fsPath;
     const existingDecorations = this.markedLines.get(filePath) || [];
-    const decorationType = this.getDecorationTypeForFile(filePath);
 
-    // Get the selected lines to unmark
-    const selectedRanges = editor.selections.map(
-      (selection) =>
-        new vscode.Range(
-          selection.start.line,
-          0,
-          selection.end.line,
-          editor.document.lineAt(selection.end.line).text.length
-        )
-    );
-
-    // Filter out the decorations that overlap with the selected ranges
-    const remainingDecorations = existingDecorations.filter((decoration) => {
-      // Check if the decoration overlaps with any of the selected ranges
-      return !selectedRanges.some(
-        (range) => decoration.range.intersection(range) !== undefined
-      );
+    // Create a set of lines to unmark
+    const linesToUnmark = new Set<number>();
+    editor.selections.forEach((selection) => {
+      for (
+        let line = selection.start.line;
+        line <= selection.end.line;
+        line++
+      ) {
+        linesToUnmark.add(line);
+      }
     });
 
-    // Update markedLines and apply decorations
-    this.markedLines.set(filePath, remainingDecorations);
-    editor.setDecorations(decorationType, remainingDecorations);
+    // Process each existing decoration
+    const newDecorations: MarkedDecoration[] = [];
+    existingDecorations.forEach((decoration) => {
+      let currentStart = decoration.range.start.line;
+      let currentEnd = decoration.range.start.line - 1; // Initialize to invalid range
 
-    // Save state
+      // Process each line in the decoration
+      for (
+        let line = decoration.range.start.line;
+        line <= decoration.range.end.line;
+        line++
+      ) {
+        if (!linesToUnmark.has(line)) {
+          // If this line should be kept
+          currentEnd = line;
+        } else if (currentEnd >= currentStart) {
+          // If we have a valid range to keep
+          newDecorations.push({
+            range: new vscode.Range(
+              currentStart,
+              0,
+              currentEnd,
+              editor.document.lineAt(currentEnd).text.length
+            ),
+          });
+          currentStart = line + 1;
+          currentEnd = line;
+        } else {
+          currentStart = line + 1;
+        }
+      }
+
+      // Add the final range if it's valid
+      if (currentEnd >= currentStart) {
+        newDecorations.push({
+          range: new vscode.Range(
+            currentStart,
+            0,
+            currentEnd,
+            editor.document.lineAt(currentEnd).text.length
+          ),
+        });
+      }
+    });
+
+    // Update decorations
+    this.markedLines.set(filePath, newDecorations);
+    const decorationType = this.getDecorationTypeForFile(filePath);
+    editor.setDecorations(decorationType, newDecorations);
+
     await this.saveState();
   }
 
-  // Remove all line marks in the current file
+  // Clear all line marks in current file
   public async clearAllLineMarksInFile(): Promise<void> {
     const editor = vscode.window.activeTextEditor;
     if (!editor) {
@@ -205,34 +311,21 @@ export class LineMarker {
     const filePath = editor.document.uri.fsPath;
     const decorationType = this.getDecorationTypeForFile(filePath);
 
-    // Clear decorations for this file
     this.markedLines.delete(filePath);
     editor.setDecorations(decorationType, []);
 
-    // Save state
     await this.saveState();
-
     vscode.window.showInformationMessage(MESSAGES.ALL_LINE_MARKS_REMOVED);
   }
 
-  // Reset all line marks in the project (workspace)
-  public async clearAllLineMarksInDirectory(): Promise<void> {
-    // Get all workspace folders
-    const workspaceFolders = vscode.workspace.workspaceFolders;
-    if (!workspaceFolders) {
-      vscode.window.showInformationMessage(MESSAGES.NO_WORKSPACE_FOLDERS);
-      return;
-    }
-
-    // Count how many files have marked lines
+  // Clear all line marks in the project
+  public async clearAllLineMarksInProject(): Promise<void> {
     const filesWithMarks = Array.from(this.markedLines.keys());
-
     if (filesWithMarks.length === 0) {
       vscode.window.showInformationMessage(MESSAGES.NO_MARKED_LINES);
       return;
     }
 
-    // Clear all line decorations
     this.markedLines.clear();
 
     // Clear decorations for all open editors
@@ -242,9 +335,7 @@ export class LineMarker {
       editor.setDecorations(decorationType, []);
     });
 
-    // Save state
     await this.saveState();
-
     vscode.window.showInformationMessage(
       MESSAGES.ALL_LINE_MARKS_RESET.replace(
         "{count}",
@@ -253,12 +344,8 @@ export class LineMarker {
     );
   }
 
-  private getStorageKeyForMarkedLines(): string {
-    return STORAGE_KEYS.MARKED_LINES;
-  }
-
+  // Save line marks state to workspace storage
   private async saveState(): Promise<void> {
-    // Save line decorations
     const markedLinesMap: {
       [key: string]: Array<{ startLine: number; endLine: number }>;
     } = {};
@@ -271,35 +358,36 @@ export class LineMarker {
     }
 
     await this.context.workspaceState.update(
-      this.getStorageKeyForMarkedLines(),
+      STORAGE_KEYS.MARKED_LINES,
       markedLinesMap
     );
   }
 
+  // Restore line marks state from workspace storage
   public async restoreState(): Promise<void> {
-    // Restore line decorations
     const markedLinesMap = this.context.workspaceState.get<{
       [key: string]: Array<{ startLine: number; endLine: number }>;
-    }>(this.getStorageKeyForMarkedLines(), {});
+    }>(STORAGE_KEYS.MARKED_LINES, {});
 
     for (const [filePath, ranges] of Object.entries(markedLinesMap)) {
-      const decorations: MarkedDecoration[] = [];
-
-      for (const range of ranges) {
-        decorations.push({
-          range: new vscode.Range(
-            range.startLine,
-            0,
-            range.endLine,
-            Number.MAX_SAFE_INTEGER
-          ),
-        });
-      }
+      const decorations: MarkedDecoration[] = ranges.map((range) => ({
+        range: new vscode.Range(
+          range.startLine,
+          0,
+          range.endLine,
+          Number.MAX_SAFE_INTEGER
+        ),
+      }));
 
       this.markedLines.set(filePath, decorations);
     }
+
+    vscode.window.visibleTextEditors.forEach((editor) => {
+      this.applyDecorations(editor);
+    });
   }
 
+  // Cleanup resources
   public dispose(): void {
     this.lineDecorationTypes.forEach((decorationType) =>
       decorationType.dispose()

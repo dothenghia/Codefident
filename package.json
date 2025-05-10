@@ -1,11 +1,12 @@
 {
   "name": "codefident",
   "displayName": "Codefident",
-  "description": "Mark and track reviewed lines and files in VS Code",
-  "version": "1.0.0",
-  "publisher": "vscode-extensions",
+  "description": "Mark and track reviewed lines, files, and directories in VS Code",
+  "version": "2.0.0",
+  "publisher": "dothenghia",
   "author": {
-    "name": "Codefident Team"
+    "name": "dothenghia",
+    "email": "tnghia.dev@gmail.com"
   },
   "license": "MIT",
   "repository": {
@@ -41,63 +42,75 @@
       {
         "command": "codefident.toggleFile",
         "title": "Toggle File Mark",
-        "description": "Mark/Unmark the current file as reviewed"
+        "description": "Mark/Unmark the selected file as reviewed"
+      },
+      {
+        "command": "codefident.toggleDirectory",
+        "title": "Toggle Directory Mark",
+        "description": "Mark/Unmark the selected directory as reviewed"
       },
       {
         "command": "codefident.clearAllLineMarksInFile",
-        "title": "Remove All Line Marks",
+        "title": "Remove All Line Marks in File",
         "description": "Remove all marked lines in the current file"
       },
       {
-        "command": "codefident.clearAllFileMarksInDirectory",
-        "title": "Reset All File Marks in Project",
-        "description": "Remove all marked files in the current workspace"
+        "command": "codefident.clearAllLineMarksInProject",
+        "title": "Clear All Line Marks in Project",
+        "description": "Clear all line review marks across all files in the current workspace"
       },
       {
-        "command": "codefident.clearAllLineMarksInDirectory",
-        "title": "Reset All Line Marks in Project",
-        "description": "Remove all line markings across all files in the workspace"
+        "command": "codefident.clearAllFileMarksInProject",
+        "title": "Clear All File Marks in Project",
+        "description": "Clear all file review marks in the current workspace"
+      },
+      {
+        "command": "codefident.clearAllDirectoryMarksInProject",
+        "title": "Clear All Directory Marks in Project",
+        "description": "Clear all directory review marks in the current workspace"
       }
     ],
     "keybindings": [
       {
         "command": "codefident.toggleSelectedLines",
-        "key": "alt+shift+w",
-        "mac": "alt+shift+w",
+        "key": "alt+shift+1",
+        "mac": "alt+shift+1",
         "when": "editorTextFocus"
       },
       {
         "command": "codefident.toggleFile",
-        "key": "alt+shift+e",
-        "mac": "alt+shift+e",
-        "when": "resourceLangId && explorerViewletVisible || editorTextFocus"
+        "key": "alt+shift+2",
+        "mac": "alt+shift+2",
+        "when": "editorTextFocus || explorerFocus || filesExplorerFocus"
+      },
+      {
+        "command": "codefident.toggleDirectory",
+        "key": "alt+shift+3",
+        "mac": "alt+shift+3",
+        "when": "explorerFocus || filesExplorerFocus"
       }
     ],
     "menus": {
       "editor/context": [
         {
           "command": "codefident.toggleSelectedLines",
-          "group": "codefident@1",
-          "when": "editorTextFocus"
+          "group": "codefident@1"
         },
         {
           "command": "codefident.clearAllLineMarksInFile",
-          "group": "codefident@2",
-          "when": "editorTextFocus"
+          "group": "codefident@2"
         }
       ],
       "explorer/context": [
         {
           "command": "codefident.toggleFile",
-          "group": "codefident@1"
+          "group": "codefident@1",
+          "when": "!explorerResourceIsFolder"
         },
         {
-          "command": "codefident.clearAllFileMarksInDirectory",
-          "group": "codefident@2"
-        },
-        {
-          "command": "codefident.clearAllLineMarksInDirectory",
-          "group": "codefident@3"
+          "command": "codefident.toggleDirectory",
+          "group": "codefident@2",
+          "when": "explorerResourceIsFolder"
         }
       ]
     },
@@ -106,13 +119,46 @@
       "properties": {
         "codefident.highlightColor": {
           "type": "string",
-          "default": "rgba(0, 122, 204, 0.2)",
-          "description": "Color used to highlight reviewed lines"
+          "default": "rgba(22, 119, 255, 0.15)",
+          "description": "Color used to highlight reviewed lines (Line Mark Style: Inline)"
+        },
+        "codefident.sidebarColor": {
+          "type": "string",
+          "default": "rgba(22, 119, 255, 1)",
+          "description": "Color used for sidebar line marking (Line Mark Style: Sidebar)"
+        },
+        "codefident.lineMarkStyle": {
+          "type": "string",
+          "enum": [
+            "inline",
+            "sidebar"
+          ],
+          "enumDescriptions": [
+            "Highlight the entire line with background color",
+            "Show a colored border on the left side of the line"
+          ],
+          "default": "inline",
+          "description": "Style of line marking"
         },
         "codefident.reviewedFileIcon": {
           "type": "string",
           "default": "✓",
-          "description": "Icon character displayed for reviewed files in the Explorer (must be a single character, allow emoji)"
+          "description": "Icon displayed for reviewed files (Default: ✓)"
+        },
+        "codefident.changedFileIcon": {
+          "type": "string",
+          "default": "↻",
+          "description": "Icon for files that were reviewed but have changed (Default: ↻)"
+        },
+        "codefident.reviewedDirectoryIcon": {
+          "type": "string",
+          "default": "✓",
+          "description": "Icon displayed for reviewed directories (Default: ✓)"
+        },
+        "codefident.showStatusBar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the Codefident status bar item"
         }
       }
     }
@@ -122,18 +168,19 @@
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "pretest": "npm run compile && npm run lint",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "lint": "eslint src --ext ts"
   },
   "devDependencies": {
-    "@types/vscode": "^1.87.0",
-    "@types/mocha": "^10.0.10",
-    "@types/node": "14.x",
-    "@typescript-eslint/eslint-plugin": "^5.62.0",
-    "@typescript-eslint/parser": "^5.62.0",
-    "eslint": "^8.57.0",
-    "typescript": "^4.9.5",
-    "@vscode/test-cli": "^0.0.4",
-    "@vscode/test-electron": "^2.3.9"
+    "@types/vscode": "^1.85.0",
+    "@types/glob": "^8.1.0",
+    "@types/mocha": "^10.0.6",
+    "@types/node": "20.x",
+    "@typescript-eslint/eslint-plugin": "^6.13.1",
+    "@typescript-eslint/parser": "^6.13.1",
+    "eslint": "^8.54.0",
+    "glob": "^10.3.10",
+    "mocha": "^10.2.0",
+    "typescript": "^5.3.2",
+    "@vscode/test-electron": "^2.3.8"
   }
 }
