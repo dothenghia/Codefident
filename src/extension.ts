@@ -1,40 +1,34 @@
 import * as vscode from "vscode";
-import { LineMarker } from "./modules/line";
+import { LineMarker, MarkedDecoration } from "./modules/line";
 import { FileMarker } from "./modules/file";
-import { COMMANDS } from "./constants/constants";
+import { DirectoryMarker } from "./modules/directory";
+import { StatusBarManager } from "./managers/statusBar";
+import { COMMANDS, WELCOME_MESSAGES } from "./constants/constants";
 
-const WELCOME_MESSAGES = [
-  "[Codefident] Happy Coding! 🥰",
-  "[Codefident] Have a nice day! 👋",
-  "[Codefident] You're doing great! 🌟",
-  "[Codefident] Code with confidence! 💻",
-  "[Codefident] Let's make something amazing! 🚀",
-  "[Codefident] No need to double-check. You've marked it. ✅",
-  "[Codefident] Trust yourself — you reviewed this already! 🧘",
-  "[Codefident] Don't overthink it. Keep building! 🛠️",
-  "[Codefident] Review once. Move forward. 🔁➡️",
-  "[Codefident] Code it. Review it. Mark it. Done. 🏁",
-];
-
+// Main extension activation function
 export function activate(context: vscode.ExtensionContext) {
   // Show random welcome message
   const randomMessage =
     WELCOME_MESSAGES[Math.floor(Math.random() * WELCOME_MESSAGES.length)];
   vscode.window.showInformationMessage(randomMessage);
 
-  // Initialize line and file markers
+  // Initialize markers and managers
   const lineMarker = new LineMarker(context);
   const fileMarker = new FileMarker(context);
+  const directoryMarker = new DirectoryMarker(context, fileMarker);
+  const statusBarManager = new StatusBarManager(context);
 
-  // Restore state
+  // Restore previous session state
   lineMarker.restoreState();
   fileMarker.restoreState();
+  directoryMarker.restoreState();
 
-  // Register commands
+  // Register command handlers
   const toggleSelectedLinesCommand = vscode.commands.registerCommand(
     COMMANDS.TOGGLE_SELECTED_LINES,
     async () => {
       await lineMarker.toggleSelectedLines();
+      updateStats();
     }
   );
 
@@ -42,6 +36,15 @@ export function activate(context: vscode.ExtensionContext) {
     COMMANDS.TOGGLE_FILE,
     async (fileUri?: vscode.Uri) => {
       await fileMarker.toggleFile(fileUri);
+      updateStats();
+    }
+  );
+
+  const toggleDirectoryCommand = vscode.commands.registerCommand(
+    COMMANDS.TOGGLE_DIRECTORY,
+    async (directoryUri?: vscode.Uri) => {
+      await directoryMarker.toggleDirectory(directoryUri);
+      updateStats();
     }
   );
 
@@ -49,22 +52,34 @@ export function activate(context: vscode.ExtensionContext) {
     COMMANDS.CLEAR_ALL_LINE_MARKS_IN_FILE,
     async () => {
       await lineMarker.clearAllLineMarksInFile();
+      updateStats();
     }
   );
 
-  const clearAllLineMarksInDirectoryCommand = vscode.commands.registerCommand(
-    COMMANDS.CLEAR_ALL_LINE_MARKS_IN_DIRECTORY,
+  const clearAllLineMarksInProjectCommand = vscode.commands.registerCommand(
+    COMMANDS.CLEAR_ALL_LINE_MARKS_IN_PROJECT,
     async () => {
-      await lineMarker.clearAllLineMarksInDirectory();
+      await lineMarker.clearAllLineMarksInProject();
+      updateStats();
     }
   );
 
-  const clearAllFileMarksInDirectoryCommand = vscode.commands.registerCommand(
-    COMMANDS.CLEAR_ALL_FILE_MARKS_IN_DIRECTORY,
+  const clearAllFileMarksInProjectCommand = vscode.commands.registerCommand(
+    COMMANDS.CLEAR_ALL_FILE_MARKS_IN_PROJECT,
     async () => {
-      await fileMarker.clearAllFileMarksInDirectory();
+      await fileMarker.clearAllFileMarksInProject();
+      updateStats();
     }
   );
+
+  const clearAllDirectoryMarksInProjectCommand =
+    vscode.commands.registerCommand(
+      COMMANDS.CLEAR_ALL_DIRECTORY_MARKS_IN_PROJECT,
+      async () => {
+        await directoryMarker.clearAllDirectoryMarksInProject();
+        updateStats();
+      }
+    );
 
   // Register context menu providers
   const editorContextMenuProvider = vscode.window.registerWebviewViewProvider(
@@ -91,7 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Register event listeners
+  // Track active editor changes
   const onDidChangeActiveTextEditor = vscode.window.onDidChangeActiveTextEditor(
     (editor) => {
       if (editor) {
@@ -100,26 +115,54 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  // Add all subscriptions to the extension's subscriptions
+  // Helper functions
+  // Get current review statistics
+  function getStats() {
+    return {
+      markedLines: Array.from(lineMarker.getMarkedLines().values()).reduce(
+        (total, decorations) =>
+          total +
+          decorations.reduce(
+            (sum, decoration) =>
+              sum +
+              (decoration.range.end.line - decoration.range.start.line + 1),
+            0
+          ),
+        0
+      ),
+      markedFiles: fileMarker.getMarkedFiles().size,
+      markedDirectories: directoryMarker.getMarkedDirectories().size,
+    } as const;
+  }
+
+  // Update status bar with current stats
+  function updateStats() {
+    statusBarManager.updateStats(getStats());
+  }
+
+  // Initial stats update
+  updateStats();
+
+  // Register disposables
   context.subscriptions.push(
     toggleSelectedLinesCommand,
     toggleFileCommand,
+    toggleDirectoryCommand,
     clearAllLineMarksInFileCommand,
-    clearAllLineMarksInDirectoryCommand,
-    clearAllFileMarksInDirectoryCommand,
+    clearAllLineMarksInProjectCommand,
+    clearAllFileMarksInProjectCommand,
+    clearAllDirectoryMarksInProjectCommand,
+    onDidChangeActiveTextEditor,
     editorContextMenuProvider,
     explorerContextMenuProvider,
-    onDidChangeActiveTextEditor,
     lineMarker,
-    fileMarker
+    fileMarker,
+    directoryMarker,
+    statusBarManager
   );
 }
 
-// This method is called when your extension is deactivated
+// Extension deactivation handler
 export function deactivate() {
-  // Show goodbye message
-  vscode.window.showInformationMessage(
-    "[Codefident] Noooo, please use me 🥺💔"
-  );
-  // Cleanup is handled by the dispose methods of LineMarker and FileMarker
+  // Cleanup is handled by the dispose methods of each component
 }
