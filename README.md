@@ -1,131 +1,92 @@
 # Codefident
 
-A lightweight Visual Studio Code extension for marking and tracking reviewed lines and files in large codebases.
+A Visual Studio Code extension that helps you track your code review progress with confidence. Stop double-checking the same code repeatedly and focus on what matters.
 
-## Features
+> This extension was built by an OCD dev who open the same file 10 times… just to be sure 😂
 
-### Mark Lines as Reviewed
+## 🤔 Why Codefident?
 
-- Select lines in the editor and toggle them as "Reviewed"
-- Marked lines are highlighted with a customizable background color
-- Access via right-click context menu or Command Palette
+Ever find yourself reviewing the same code over and over? Us too! Codefident is here to save you from your own perfectionism:
 
-### Mark Files as Reviewed
+- ✅ Track which directories, files, and lines you've already reviewed
+- ✅ Focus on new or changed code
+- ✅ Build confidence in your review process
+- ✅ Save time by avoiding unnecessary re-reviews
+- ✅ Monitor review progress with real-time stats
 
-- Toggle the file as "Reviewed" directly from the Explorer view
-- Right-click on a file in the Explorer to mark/unmark it
-- Use the keyboard shortcut when a file is selected in the Explorer
-- Files marked as reviewed show a checkmark (✓) or a customizable icon in the Explorer view
-- Access via right-click in Explorer, keyboard shortcut, or Command Palette
+## 🚀 Features
 
-### Other Operations
+### Line Tracking
 
-- Remove all line marks in the current file
-- Reset all line marks across the entire project
-- Reset all file marks across the entire project
+- Mark lines as reviewed with customizable highlights
+- Choose between inline or sidebar indicators
+- Automatically track line changes
+- Merge overlapping line marks for tidiness
 
-### Available Commands
+### File Tracking
 
-All commands are accessible through the Command Palette (Ctrl+Shift+P / Cmd+Shift+P):
+- Mark files as reviewed with visual flair
+- Track file modifications post-review
+- Different icons for reviewed and modified files
 
-- `Toggle Line Mark` - Mark/Unmark the selected lines as reviewed
-- `Toggle File Mark` - Mark/Unmark the current file as reviewed
-- `Remove All Line Marks` - Remove all marked lines in the current file
-- `Reset All File Marks in Project` - Remove all marked files in the current workspace
-- `Reset All Line Marks in Project` - Remove all line markings across all files in the workspace
+### Directory Tracking
 
-### Keyboard Shortcuts
+- Mark entire directories as reviewed
+- Visual indicators for reviewed directories
+- Automatic file marking within directories
 
-- `Alt+Shift+W` - Toggle Line Mark (mark/unmark selected lines)
-- `Alt+Shift+E` - Toggle File Mark (mark/unmark file when selected in Explorer or focused in editor)
+### Status Bar Integration
 
-### State Persistence
+- Real-time stats of marked lines, files, and directories
+- Quick access to clear marks via status bar menu
 
-- All marked lines and files are automatically saved and restored when you reopen VS Code
-- State is maintained per workspace
+## 🎮 Commands & Shortcuts
 
-## Installation
+- `Toggle Line Mark` - Mark/unmark selected lines
+- `Clear All Line Marks in File` - Remove all line marks in current file
+- `Clear All Line Marks in Project` - Remove all line marks in workspace
+- `Toggle File Mark` - Mark/unmark current file
+- `Clear All File Marks in Project` - Remove all file marks in workspace
+- `Toggle Directory Mark` - Mark/unmark current directory
+- `Clear All Directory Marks in Project` - Remove all directory marks in workspace
+
+### ⌨️ Keyboard Shortcuts
+
+- `Alt+Shift+1` - Toggle Line Mark
+- `Alt+Shift+2` - Toggle File Mark
+- `Alt+Shift+3` - Toggle Directory Mark
+
+## ⚙️ Installation
 
 1. Open VS Code
-2. Press `Ctrl+P` / `Cmd+P` to open the Quick Open dialog
+2. Press `Ctrl+P` / `Cmd+P`
 3. Type `ext install codefident`
 4. Click Install
 
-## Packaging the Extension
+## 🛠️ Configuration
 
-To create a `.vsix` package for distribution:
-
-1. Make sure you have the VSCE (Visual Studio Code Extensions) tool installed:
-
-   ```bash
-   npm install -g @vscode/vsce
-   ```
-
-2. Build and package the extension:
-
-   ```bash
-   npm run compile && vsce package
-   ```
-
-   This will create a `.vsix` file in your project directory that can be installed in VS Code.
-
-3. To install the packaged extension:
-   - Open VS Code
-   - Go to Extensions view (Ctrl+Shift+X / Cmd+Shift+X)
-   - Click on the "..." menu at the top
-   - Select "Install from VSIX..."
-   - Choose your `.vsix` file
-
-## Configuration
-
-You can customize the appearance of reviewed lines and files in your VS Code settings:
+Customize Codefident through VS Code settings:
 
 ```json
 {
-  "codefident.highlightColor": "rgba(0, 122, 204, 0.2)",
-  "codefident.reviewedFileIcon": "✓"
+  "codefident.highlightColor": "rgba(22, 119, 255, 0.15)",
+  "codefident.sidebarColor": "rgba(22, 119, 255, 1)",
+  "codefident.lineMarkStyle": "inline", // or "sidebar"
+  "codefident.reviewedFileIcon": "✓",
+  "codefident.changedFileIcon": "↻",
+  "codefident.reviewedDirectoryIcon": "✓",
+  "codefident.showStatusBar": true
 }
 ```
 
-### Available Settings
+## 🤝 Contributing
 
-- `codefident.highlightColor`: Color used to highlight reviewed lines (default: "rgba(0, 122, 204, 0.2)")
-- `codefident.reviewedFileIcon`: Icon character displayed for reviewed files in the Explorer (default: "✓")
-  - Must be a single character, including emoji like "🥰" or "✅"
-  - Only the first character will be used if multiple characters are provided
+Contributions are welcome! Submit a Pull Request and join the fun.
 
-## Usage
-
-### Marking Lines
-
-1. Select one or more lines in your code
-2. Right-click and select "Toggle Line Mark" or use the Command Palette
-3. The lines will be highlighted with the configured color
-4. Select already marked lines and use the same command to unmark them
-5. Alternatively, use the keyboard shortcut `Alt+Shift+W` to toggle line marks
-
-### Marking Files
-
-1. In the Explorer view, right-click on a file and select "Toggle File Mark"
-2. Alternatively, select a file in the Explorer and press `Alt+Shift+E`
-3. You can also mark the currently open file by pressing `Alt+Shift+E` while the editor is focused
-4. A checkmark icon will appear next to the file
-5. Use the same command to unmark the file
-
-### Clearing Marks
-
-- Use "Remove All Line Marks" to clear all line marks in the current file
-- Use "Reset All Line Marks in Project" to clear all line marks across the entire project
-- Use "Reset All File Marks in Project" to clear all file marks across the entire project
-
-## Requirements
-
-- Visual Studio Code version 1.99.0 or higher
-
-## License
+## 📜 License
 
 MIT
 
-## Contributing
+## 🐞 Support
 
-Feel free to submit issues and enhancement requests!
+Found a bug or have a feature request? Please [open an issue](https://github.com/yourusername/codefident/issues).

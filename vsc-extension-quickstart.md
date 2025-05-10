@@ -1,44 +1,138 @@
-# Welcome to your VS Code Extension
+# Codefident Extension Development Quick Start
 
-## What's in the folder
+This guide will help you get started with developing the Codefident extension.
 
-* This folder contains all of the files necessary for your extension.
-* `package.json` - this is the manifest file in which you declare your extension and command.
-  * The sample plugin registers a command and defines its title and command name. With this information VS Code can show the command in the command palette. It doesn’t yet need to load the plugin.
-* `src/extension.ts` - this is the main file where you will provide the implementation of your command.
-  * The file exports one function, `activate`, which is called the very first time your extension is activated (in this case by executing the command). Inside the `activate` function we call `registerCommand`.
-  * We pass the function containing the implementation of the command as the second parameter to `registerCommand`.
+## Prerequisites
 
-## Get up and running straight away
+- Node.js (v14 or later)
+- npm (v6 or later)
+- Visual Studio Code
+- Git
 
-* Press `F5` to open a new window with your extension loaded.
-* Run your command from the command palette by pressing (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac) and typing `Hello World`.
-* Set breakpoints in your code inside `src/extension.ts` to debug your extension.
-* Find output from your extension in the debug console.
+## Getting Started
 
-## Make changes
+1. Clone the repository:
 
-* You can relaunch the extension from the debug toolbar after changing code in `src/extension.ts`.
-* You can also reload (`Ctrl+R` or `Cmd+R` on Mac) the VS Code window with your extension to load your changes.
+   ```bash
+   git clone https://github.com/yourusername/codefident.git
+   cd codefident
+   ```
 
-## Explore the API
+2. Install dependencies:
 
-* You can open the full set of our API when you open the file `node_modules/@types/vscode/index.d.ts`.
+   ```bash
+   npm install
+   ```
 
-## Run tests
+3. Open the project in VS Code:
+   ```bash
+   code .
+   ```
 
-* Install the [Extension Test Runner](https://marketplace.visualstudio.com/items?itemName=ms-vscode.extension-test-runner)
-* Run the "watch" task via the **Tasks: Run Task** command. Make sure this is running, or tests might not be discovered.
-* Open the Testing view from the activity bar and click the Run Test" button, or use the hotkey `Ctrl/Cmd + ; A`
-* See the output of the test result in the Test Results view.
-* Make changes to `src/test/extension.test.ts` or create new test files inside the `test` folder.
-  * The provided test runner will only consider files matching the name pattern `**.test.ts`.
-  * You can create folders inside the `test` folder to structure your tests any way you want.
+## Development Workflow
 
-## Go further
+1. Start the extension in debug mode:
 
-* [Follow UX guidelines](https://code.visualstudio.com/api/ux-guidelines/overview) to create extensions that seamlessly integrate with VS Code's native interface and patterns.
-* Reduce the extension size and improve the startup time by [bundling your extension](https://code.visualstudio.com/api/working-with-extensions/bundling-extension).
-* [Publish your extension](https://code.visualstudio.com/api/working-with-extensions/publishing-extension) on the VS Code extension marketplace.
-* Automate builds by setting up [Continuous Integration](https://code.visualstudio.com/api/working-with-extensions/continuous-integration).
-* Integrate to the [report issue](https://code.visualstudio.com/api/get-started/wrapping-up#issue-reporting) flow to get issue and feature requests reported by users.
+   - Press F5 in VS Code
+   - This will open a new Extension Development Host window
+   - The extension will be loaded in this window
+
+2. Make changes to the code:
+
+   - The extension will automatically recompile when you save changes
+   - Press Ctrl+R (Cmd+R on macOS) in the Extension Development Host window to reload
+
+3. Test your changes:
+   - Use the Extension Development Host window to test your changes
+   - Check the Debug Console for any errors or logs
+
+## Project Structure
+
+```
+codefident/
+├── src/                    # Source code
+│   ├── modules/           # Core functionality modules
+│   │   ├── line.ts       # Line marking functionality
+│   │   ├── file.ts       # File marking functionality
+│   │   └── directory.ts  # Directory marking functionality
+│   ├── managers/         # Extension managers
+│   │   └── statusBar.ts  # Status bar integration
+│   ├── constants/        # Constants and configuration
+│   │   └── constants.ts  # Extension constants and defaults
+│   └── extension.ts      # Extension entry point
+├── package.json          # Extension manifest
+├── tsconfig.json         # TypeScript configuration
+└── README.md            # Project documentation
+```
+
+## Core Components
+
+### Line Marker (`src/modules/line.ts`)
+
+- Handles line-level marking functionality
+- Manages line decorations and styles
+- Tracks line changes and updates
+
+### File Marker (`src/modules/file.ts`)
+
+- Manages file-level marking
+- Tracks file modifications
+- Handles file decoration providers
+
+### Directory Marker (`src/modules/directory.ts`)
+
+- Handles directory-level marking
+- Manages directory decorations
+- Coordinates with file marker for nested marking
+
+### Status Bar Manager (`src/managers/statusBar.ts`)
+
+- Displays real-time statistics
+- Provides quick access to clear commands
+- Manages status bar visibility
+
+## Building and Packaging
+
+1. Build the extension:
+
+   ```bash
+   npm run compile
+   ```
+
+2. Package the extension:
+   ```bash
+   npm run package
+   ```
+   This will create a `.vsix` file in the project root.
+
+## Testing
+
+1. Run unit tests:
+
+   ```bash
+   npm run test
+   ```
+
+2. Run integration tests:
+   ```bash
+   npm run test:integration
+   ```
+
+## Debugging
+
+- Use the Debug Console in VS Code to see extension logs
+- Set breakpoints in your code to debug
+- Use the VS Code Developer Tools (Help > Toggle Developer Tools) for more detailed debugging
+
+## Contributing
+
+1. Create a new branch for your feature/fix
+2. Make your changes
+3. Run tests to ensure everything works
+4. Submit a pull request
+
+## Resources
+
+- [VS Code Extension API](https://code.visualstudio.com/api)
+- [VS Code Extension Samples](https://github.com/microsoft/vscode-extension-samples)
+- [VS Code Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
