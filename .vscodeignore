@@ -9,3 +9,16 @@ vsc-extension-quickstart.md
 **/*.map
 **/*.ts
 **/.vscode-test.*
+**/test/**
+**/coverage/**
+**/.eslintrc.*
+**/.prettierrc.*
+**/jest.config.*
+**/webpack.config.*
+**/package-lock.json
+**/yarn.lock
+**/.npmrc
+**/.env*
+**/README.md
+**/CHANGELOG.md
+**/LICENSE

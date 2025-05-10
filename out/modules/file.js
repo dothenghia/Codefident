@@ -1,168 +1,175 @@
 "use strict";
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.FileMarker = void 0;
-const vscode = require("vscode");
+const vscode = __importStar(require("vscode"));
 const constants_1 = require("../constants/constants");
 class FileMarker {
     constructor(context) {
         this.context = context;
-        this.markedFiles = new Set();
+        this.markedFiles = new Map();
         this._onDidChangeFileDecorations = new vscode.EventEmitter();
         // Initialize file decoration provider
         this.fileDecorationProvider = this.createFileDecorationProvider();
         context.subscriptions.push(vscode.window.registerFileDecorationProvider(this.fileDecorationProvider), this._onDidChangeFileDecorations);
+        // Listen for file changes
+        context.subscriptions.push(vscode.workspace.onDidChangeTextDocument((e) => {
+            const filePath = e.document.uri.fsPath;
+            if (this.markedFiles.has(filePath)) {
+                this.handleFileChange(filePath);
+            }
+        }));
         // Listen for configuration changes
         context.subscriptions.push(vscode.workspace.onDidChangeConfiguration((e) => {
-            if (e.affectsConfiguration(constants_1.CONFIG_KEYS.FILE_ICON)) {
+            if (e.affectsConfiguration(constants_1.CONFIG_KEYS.REVIEWED_FILE_ICON) ||
+                e.affectsConfiguration(constants_1.CONFIG_KEYS.CHANGED_FILE_ICON)) {
                 this._onDidChangeFileDecorations.fire(vscode.Uri.file(""));
             }
         }));
     }
-    getMarkedFiles() {
-        return this.markedFiles;
-    }
-    setMarkedFiles(markedFiles) {
-        this.markedFiles = markedFiles;
-    }
+    // Create and configure file decoration provider
     createFileDecorationProvider() {
         return {
             onDidChangeFileDecorations: this._onDidChangeFileDecorations.event,
-            provideFileDecoration: (uri) => {
-                if (this.markedFiles.has(uri.fsPath)) {
-                    const config = vscode.workspace.getConfiguration("line-marker");
-                    const reviewedFileIcon = config.get(constants_1.CONFIG_KEYS.FILE_ICON) || constants_1.DEFAULTS.FILE_BADGE;
-                    // Ensure the icon is only a single character
-                    const icon = reviewedFileIcon.length > 0
-                        ? reviewedFileIcon.charAt(0)
-                        : constants_1.DEFAULTS.FILE_BADGE;
+            provideFileDecoration: async (uri) => {
+                const filePath = uri.fsPath;
+                const markedFile = this.markedFiles.get(filePath);
+                if (!markedFile) {
+                    return undefined;
+                }
+                const config = vscode.workspace.getConfiguration();
+                const stats = await vscode.workspace.fs.stat(uri);
+                const isModified = stats.mtime > markedFile.lastModified;
+                if (isModified) {
+                    const changedFileIcon = config.get(constants_1.CONFIG_KEYS.CHANGED_FILE_ICON) ||
+                        constants_1.DEFAULTS.CHANGED_FILE_BADGE;
                     return {
-                        badge: icon,
-                        tooltip: constants_1.DEFAULTS.FILE_TOOLTIP,
+                        badge: changedFileIcon.charAt(0),
+                        tooltip: constants_1.DEFAULTS.CHANGED_FILE_TOOLTIP,
                     };
                 }
-                return undefined;
+                else {
+                    const reviewedFileIcon = config.get(constants_1.CONFIG_KEYS.REVIEWED_FILE_ICON) ||
+                        constants_1.DEFAULTS.REVIEWED_FILE_BADGE;
+                    return {
+                        badge: reviewedFileIcon.charAt(0),
+                        tooltip: constants_1.DEFAULTS.REVIEWED_FILE_TOOLTIP,
+                    };
+                }
             },
         };
     }
-    // Toggle mark for current file
-    toggleFile(fileUri) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let targetUri;
-            if (fileUri) {
-                // If a file URI is provided (from Explorer context menu), use it
-                targetUri = fileUri;
-            }
-            else {
-                // Otherwise, use the active editor's document URI
-                const editor = vscode.window.activeTextEditor;
-                if (!editor) {
-                    return;
-                }
-                targetUri = editor.document.uri;
-            }
-            const filePath = targetUri.fsPath;
-            if (this.markedFiles.has(filePath)) {
-                // If file is already marked, unmark it
-                this.unmarkFileByPath(filePath);
-            }
-            else {
-                // If file is not marked, mark it
-                this.markFileByPath(filePath);
-            }
-        });
+    // Handle file content changes
+    async handleFileChange(filePath) {
+        const markedFile = this.markedFiles.get(filePath);
+        if (!markedFile) {
+            return;
+        }
+        const uri = vscode.Uri.file(filePath);
+        const stats = await vscode.workspace.fs.stat(uri);
+        if (stats.mtime > markedFile.lastModified) {
+            // Update the decoration to show the changed state
+            this._onDidChangeFileDecorations.fire(uri);
+        }
     }
-    // Mark file by path
-    markFileByPath(filePath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.markedFiles.add(filePath);
-            yield this.saveState();
-            this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
-        });
-    }
-    // Unmark file by path
-    unmarkFileByPath(filePath) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.markedFiles.delete(filePath);
-            yield this.saveState();
-            this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
-        });
-    }
-    // Mark current file
-    markFile() {
-        return __awaiter(this, void 0, void 0, function* () {
+    // Toggle review mark for a file
+    async toggleFile(fileUri) {
+        let targetUri;
+        if (fileUri) {
+            targetUri = fileUri;
+        }
+        else {
             const editor = vscode.window.activeTextEditor;
             if (!editor) {
                 return;
             }
-            const filePath = editor.document.uri.fsPath;
-            yield this.markFileByPath(filePath);
+            targetUri = editor.document.uri;
+        }
+        const filePath = targetUri.fsPath;
+        if (this.markedFiles.has(filePath)) {
+            await this.unmarkFile(filePath);
+        }
+        else {
+            await this.markFile(filePath);
+        }
+    }
+    // Mark a file as reviewed
+    async markFile(filePath) {
+        const uri = vscode.Uri.file(filePath);
+        const stats = await vscode.workspace.fs.stat(uri);
+        this.markedFiles.set(filePath, {
+            path: filePath,
+            lastModified: stats.mtime,
         });
+        await this.saveState();
+        this._onDidChangeFileDecorations.fire(uri);
     }
-    // Unmark current file
-    unmarkFile() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const editor = vscode.window.activeTextEditor;
-            if (!editor) {
-                return;
-            }
-            const filePath = editor.document.uri.fsPath;
-            yield this.unmarkFileByPath(filePath);
-        });
+    // Remove review mark from a file
+    async unmarkFile(filePath) {
+        this.markedFiles.delete(filePath);
+        await this.saveState();
+        this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
     }
-    // Reset all file marks in the project (workspace)
-    clearAllFileMarksInDirectory() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Count how many files are marked
-            const markedFilesCount = this.markedFiles.size;
-            if (markedFilesCount === 0) {
-                vscode.window.showInformationMessage(constants_1.MESSAGES.NO_MARKED_FILES);
-                return;
-            }
-            // Store the marked files before clearing
-            const markedFilesArray = Array.from(this.markedFiles);
-            // Clear all file marks
-            this.markedFiles.clear();
-            // Save state
-            yield this.saveState();
-            // Notify about changes to all workspace folders
-            const workspaceFolders = vscode.workspace.workspaceFolders;
-            if (workspaceFolders) {
-                // Notify about changes to all workspace folders
-                const uris = workspaceFolders.map((folder) => folder.uri);
-                this._onDidChangeFileDecorations.fire(uris);
-                // Also notify about changes to each marked file individually
-                markedFilesArray.forEach((filePath) => {
-                    this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
-                });
-            }
-            vscode.window.showInformationMessage(constants_1.MESSAGES.ALL_FILE_MARKS_RESET.replace("{count}", markedFilesCount.toString()));
-        });
+    // Clear all file marks in the project
+    async clearAllFileMarksInProject() {
+        const markedFilesCount = this.markedFiles.size;
+        if (markedFilesCount === 0) {
+            vscode.window.showInformationMessage(constants_1.MESSAGES.NO_MARKED_FILES);
+            return;
+        }
+        // Store marked files before clearing
+        const markedFilesArray = Array.from(this.markedFiles.keys());
+        // Clear all file marks
+        this.markedFiles.clear();
+        await this.saveState();
+        // Notify about changes
+        const workspaceFolders = vscode.workspace.workspaceFolders;
+        if (workspaceFolders) {
+            const uris = workspaceFolders.map((folder) => folder.uri);
+            this._onDidChangeFileDecorations.fire(uris);
+            markedFilesArray.forEach((filePath) => {
+                this._onDidChangeFileDecorations.fire(vscode.Uri.file(filePath));
+            });
+        }
+        vscode.window.showInformationMessage(constants_1.MESSAGES.ALL_FILE_MARKS_RESET.replace("{count}", markedFilesCount.toString()));
     }
-    getStorageKeyForMarkedFiles() {
-        return constants_1.STORAGE_KEYS.MARKED_FILES;
+    // Save file marks state to workspace storage
+    async saveState() {
+        const markedFilesData = Array.from(this.markedFiles.values());
+        await this.context.workspaceState.update(constants_1.STORAGE_KEYS.MARKED_FILES, markedFilesData);
     }
-    saveState() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Save marked files
-            yield this.context.workspaceState.update(this.getStorageKeyForMarkedFiles(), Array.from(this.markedFiles));
-        });
+    // Restore file marks state from workspace storage
+    async restoreState() {
+        const markedFilesData = this.context.workspaceState.get(constants_1.STORAGE_KEYS.MARKED_FILES, []);
+        this.markedFiles = new Map(markedFilesData.map((file) => [file.path, file]));
     }
-    restoreState() {
-        return __awaiter(this, void 0, void 0, function* () {
-            // Restore marked files
-            const markedFilesData = this.context.workspaceState.get(this.getStorageKeyForMarkedFiles(), []);
-            this.markedFiles = new Set(markedFilesData);
-        });
+    // Get all marked files
+    getMarkedFiles() {
+        return this.markedFiles;
     }
+    // Cleanup resources
     dispose() {
         this._onDidChangeFileDecorations.dispose();
     }
